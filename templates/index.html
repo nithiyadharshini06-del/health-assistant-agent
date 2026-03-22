@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediGuide - AI Assistant</title>
-    <!-- Importing modern font for a pristine look -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -15,104 +14,140 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            background: #0f172a; /* Deep tech dark background */
+            background: #0b1120; /* Slightly darker and more premium navy */
             color: #f8fafc;
-            padding: 20px;
+            padding: 30px;
             overflow: hidden;
             position: relative;
         }
 
-        /* Ambient glowing background blobs */
-        .blob {
+        /* Ambient background glow */
+        .ambient-glow {
             position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
+            width: 100vw;
+            height: 100vh;
+            top: 0; left: 0;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.12), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.12), transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(59, 130, 246, 0.08), transparent 40%);
             z-index: -1;
-            animation: drift 12s infinite alternate ease-in-out;
-            opacity: 0.6;
+            pointer-events: none;
+            animation: pulse-glow 8s infinite alternate ease-in-out;
         }
-        .blob.cyan { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(6, 182, 212, 0.3); animation-delay: 0s; }
-        .blob.purple { bottom: -10%; right: -10%; width: 45vw; height: 45vw; background: rgba(139, 92, 246, 0.3); animation-delay: -5s; }
-        .blob.blue { top: 40%; left: 30%; width: 30vw; height: 30vw; background: rgba(59, 130, 246, 0.2); animation-delay: -2s; }
 
-        @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(80px, 40px) scale(1.1); }
+        @keyframes pulse-glow {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
         }
 
         .page-wrapper {
             display: flex;
             width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            max-height: 850px;
-            gap: 30px;
+            max-width: 1250px;
+            height: calc(100vh - 60px);
+            max-height: 900px;
+            gap: 25px;
             z-index: 1;
+            animation: app-appear 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* SIDEBAR STYLING */
+        @keyframes app-appear {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- SIDEBAR SCROLLABLE AREA --- */
         .sidebar {
             flex: 1;
+            min-width: 340px;
             max-width: 380px;
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 40px 30px;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.7));
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 35px 25px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            gap: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            
+            /* ADDED SCROLL OPTION */
+            overflow-y: auto;
+            scrollbar-width: thin; 
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+        .brand-section {
+            margin-bottom: 5px;
+            padding: 0 5px;
         }
 
         .brand-title {
-            font-size: 42px;
+            font-size: 40px;
             font-weight: 800;
             margin: 0;
-            background: linear-gradient(135deg, #22d3ee, #818cf8);
+            background: linear-gradient(135deg, #22d3ee, #818cf8, #c084fc);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -1px;
+            animation: gradient-shift 4s infinite linear;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .brand-subtitle {
             color: #94a3b8;
-            font-size: 16px;
-            margin-top: -15px;
-            font-weight: 300;
+            font-size: 15px;
+            margin-top: -5px;
+            font-weight: 400;
         }
 
         .info-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 20px;
             padding: 22px;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            cursor: default;
+            flex-shrink: 0;
         }
         
         .info-card:hover { 
-            transform: translateY(-5px); 
-            background: rgba(255, 255, 255, 0.06); 
+            transform: translateY(-4px); 
+            background: rgba(255, 255, 255, 0.05); 
+            border-color: rgba(255, 255, 255, 0.1);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
         .info-card h3 { 
             margin: 0 0 12px 0; 
-            font-size: 18px; 
-            color: #e2e8f0; 
+            font-size: 17px; 
+            color: #f1f5f9; 
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
 
         .info-card p, .info-card li { 
-            color: #cbd5e1; 
+            color: #94a3b8; 
             font-size: 14.5px; 
             line-height: 1.6; 
-            font-weight: 300;
+            font-weight: 400;
         }
+        
+        /* Make text inside card readable and brighter on hover */
+        .info-card:hover p, .info-card:hover li { color: #cbd5e1; }
 
         .info-card ul { 
             margin: 0; 
@@ -120,20 +155,20 @@
         }
 
         .info-card.emergency { 
-            border-left: 4px solid #ef4444; 
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+            border-left: 3px solid #f43f5e; 
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.08), transparent);
         }
-        .info-card.emergency h3 { color: #fca5a5; }
+        .info-card.emergency h3 { color: #fb7185; }
 
-        /* CHAT CONTAINER STYLING */
+        /* --- CHAT CONTAINER STYLING --- */
         .chat-container { 
-            flex: 2.2;
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+            flex: 2.5;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.6));
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05); 
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
@@ -142,51 +177,53 @@
 
         .chat-box { 
             flex: 1; 
-            padding: 35px 40px; 
+            padding: 30px 40px; 
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 24px; 
+            gap: 22px; 
+            scroll-behavior: smooth;
         }
 
         .chat-box::-webkit-scrollbar { width: 6px; }
         .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .chat-box::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        .chat-box::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
         .message { 
-            max-width: 82%; 
-            padding: 18px 24px; 
+            max-width: 80%; 
+            padding: 16px 22px; 
             border-radius: 20px; 
             line-height: 1.6; 
-            font-size: 16px; 
+            font-size: 15.5px; 
             position: relative;
-            animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            animation: message-appear 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             white-space: pre-wrap;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             font-weight: 300;
+            letter-spacing: 0.2px;
         }
 
         strong { font-weight: 600; color: #fff; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes message-appear {
+            from { opacity: 0; transform: translateY(15px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .bot-message { 
             align-self: flex-start; 
-            background: rgba(34, 211, 238, 0.1); 
+            background: rgba(34, 211, 238, 0.08); 
             color: #cffafe; 
-            border: 1px solid rgba(34, 211, 238, 0.2);
-            border-bottom-left-radius: 6px; 
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            border-top-left-radius: 4px; 
         }
 
         .user-message { 
             align-self: flex-end; 
-            background: rgba(139, 92, 246, 0.15); 
-            color: #ede9fe; 
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2)); 
+            color: #f1f5f9; 
             border: 1px solid rgba(139, 92, 246, 0.25);
-            border-bottom-right-radius: 6px; 
+            border-top-right-radius: 4px; 
         }
 
         .input-wrapper {
@@ -197,18 +234,18 @@
         .input-pill {
             display: flex; 
             align-items: center;
-            background: rgba(15, 23, 42, 0.6); 
-            border-radius: 40px;
-            padding: 8px 8px 8px 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(15, 23, 42, 0.8); 
+            border-radius: 20px;
+            padding: 10px 10px 10px 25px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
             transition: all 0.3s ease;
         }
         
         .input-pill:focus-within {
-            background: rgba(15, 23, 42, 0.8);
-            border-color: rgba(34, 211, 238, 0.4);
-            box-shadow: 0 10px 35px rgba(34, 211, 238, 0.1);
+            background: rgba(15, 23, 42, 0.95);
+            border-color: rgba(34, 211, 238, 0.3);
+            box-shadow: 0 10px 40px rgba(34, 211, 238, 0.15);
         }
 
         input[type="text"] { 
@@ -219,39 +256,38 @@
             font-size: 16px; 
             color: #f8fafc;
             font-family: 'Outfit', sans-serif;
-            font-weight: 300;
+            font-weight: 400;
         }
 
-        input[type="text"]::placeholder {
-            color: #64748b;
-        }
+        input[type="text"]::placeholder { color: #64748b; font-weight: 300; }
 
         .send-btn { 
-            background: linear-gradient(135deg, #22d3ee, #0ea5e9); 
+            background: linear-gradient(135deg, #0ea5e9, #6366f1); 
             color: #fff; 
             border: none; 
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 50%; 
+            border-radius: 14px; 
             cursor: pointer; 
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
 
         .send-btn:hover { 
-            transform: scale(1.05); 
+            transform: translateY(-2px); 
             box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5);
+            filter: brightness(1.1);
         }
 
         .send-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             fill: currentColor;
-            margin-right: -2px;
+            margin-left: 2px;
         }
 
         .loading { 
@@ -262,39 +298,41 @@
         .dot-typing {
             display: inline-flex;
             gap: 6px;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(255,255,255,0.05);
             padding: 12px 18px;
-            border-radius: 20px;
+            border-radius: 16px;
         }
+
         .dot {
-            width: 8px; height: 8px; background-color: #22d3ee; border-radius: 50%;
+            width: 8px; height: 8px; background-color: #38bdf8; border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
+
         .dot:nth-child(1) { animation-delay: -0.32s; }
         .dot:nth-child(2) { animation-delay: -0.16s; }
         
         @keyframes bounce {
             0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
+            40% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6); }
         }
 
+        /* Mobile Responsiveness */
         @media (max-width: 900px) {
+            body { overflow-y: auto; padding: 15px; }
+            .ambient-glow { position: fixed; }
             .page-wrapper { flex-direction: column; height: auto; max-height: none; }
-            .sidebar { max-width: 100%; border-radius: 20px; }
-            .chat-container { height: 600px; border-radius: 20px; }
-            body { padding: 15px; }
+            .sidebar { max-width: 100%; border-radius: 20px; overflow: visible; }
+            .chat-container { height: 75vh; border-radius: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="blob cyan"></div>
-    <div class="blob purple"></div>
-    <div class="blob blue"></div>
+    <div class="ambient-glow"></div>
 
     <div class="page-wrapper">
         <div class="sidebar">
-            <div>
+            <div class="brand-section">
                 <h1 class="brand-title">MediGuide</h1>
                 <p class="brand-subtitle">Your AI Health Companion</p>
             </div>
@@ -311,20 +349,18 @@
 
             <div class="info-card">
                 <h3>🩺 How to use</h3>
-                <p>Describe your symptoms clearly. Include information about when they started, how severe they are, and any other relevant details. The AI will guide you with general medical context.</p>
+                <p>Describe your symptoms clearly. Include information about when they started, how severe they are, and any other relevant details. The AI will provide insights.</p>
             </div>
 
-            <div style="flex-grow: 1;"></div>
-
-            <div class="info-card emergency">
+            <div class="info-card emergency" style="margin-top: auto;">
                 <h3>🚨 Emergency Warning</h3>
-                <p>If you are experiencing severe chest pain, extreme difficulty breathing, fainting, or sudden severe weakness, please call your local emergency hotline immediately. Do not rely on AI for emergencies.</p>
+                <p>If you are experiencing severe chest pain, extreme difficulty breathing, fainting, or sudden severe weakness, please call your local emergency hotline immediately.</p>
             </div>
         </div>
 
         <div class="chat-container">
             <div class="chat-box" id="chat-box">
-                <div class="message bot-message">Hello! I am MediGuide. I understand you are seeking health guidance today. Please describe any symptoms you are experiencing so I can assist you.<br><br><small style="opacity:0.6; font-weight:300;">Disclaimer: I provide general health information, not medical diagnoses. Please consult a human doctor for formal advice.</small></div>
+                <div class="message bot-message">Hello! I am MediGuide. I understand you are seeking health guidance today. Please describe any symptoms you are experiencing so I can assist you.<br><br><small style="opacity:0.6; font-weight:400; font-size: 13.5px;">Disclaimer: I provide general health information, not medical diagnoses. Please consult a human doctor for formal advice.</small></div>
             </div>
             
             <div class="loading" id="loading">
@@ -337,8 +373,8 @@
                 <div class="input-pill">
                     <input type="text" id="user-input" placeholder="Type your symptoms here..." onkeypress="handleKeyPress(event)" autocomplete="off">
                     <button class="send-btn" onclick="sendMessage()">
-                        <!-- Modern Send Icon -->
-                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        <!-- Modern Send Icon (Up Arrow) -->
+                        <svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.99.99 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.06-.87.49-.87.99l.01 4.61c0 .71.73 1.2 1.39.92z"/></svg>
                     </button>
                 </div>
             </div>
