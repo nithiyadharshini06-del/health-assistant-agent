@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediGuide - AI Assistant</title>
+    <!-- Importing modern font for a pristine look -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: linear-gradient(135deg, #30D2E6, #149FBE);
+            background-size: cover;
+            padding: 20px;
+        }
+        
+        .app-wrapper {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            max-height: 850px;
+        }
+
+        .header {
+            color: #ffffff;
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 10px 0 10px;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chat-container { 
+            flex: 1;
+            /* Ultra-modern glassmorphism medical look */
+            background: rgba(220, 248, 250, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 35px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15), inset 0 0 0 1.5px rgba(255,255,255, 0.6); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .chat-box { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+
+        /* Beautiful scrollbar hiding */
+        .chat-box::-webkit-scrollbar { width: 6px; }
+        .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 10px; }
+
+        .message { 
+            max-width: 80%; 
+            padding: 16px 20px; 
+            border-radius: 20px; 
+            line-height: 1.5; 
+            font-size: 16.5px; 
+            position: relative;
+            animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            white-space: pre-wrap;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-message { 
+            align-self: flex-start; 
+            background: #82DFEA; 
+            color: #0A5A66; 
+            border-bottom-left-radius: 6px; 
+        }
+
+        .user-message { 
+            align-self: flex-end; 
+            background: #ffffff; 
+            color: #108796; 
+            border-bottom-right-radius: 6px; 
+        }
+
+        .input-wrapper {
+            padding: 0 30px 30px 30px;
+            background: transparent;
+        }
+
+        .input-pill {
+            display: flex; 
+            align-items: center;
+            background: #7FD5E0; 
+            border-radius: 40px;
+            padding: 5px 5px 5px 22px;
+            box-shadow: 0 8px 25px rgba(13, 116, 126, 0.12);
+            transition: background 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .input-pill:focus-within {
+            background: #8EE0EA;
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 10px 30px rgba(13, 116, 126, 0.18);
+        }
+
+        input[type="text"] { 
+            flex: 1; 
+            background: transparent;
+            border: none; 
+            outline: none; 
+            font-size: 17px; 
+            color: #0c626f;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(12, 98, 111, 0.5);
+            font-weight: 400;
+        }
+
+        .send-btn { 
+            background: #ffffff; 
+            color: #16A8B8; 
+            border: none; 
+            width: 46px;
+            height: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%; 
+            cursor: pointer; 
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .send-btn:hover { 
+            transform: translateY(-2px); 
+            background: #f4fdff;
+            color: #0c8a98;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .send-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            margin-bottom: 2px;
+        }
+
+        .loading { 
+            display: none;
+            padding: 0 20px 15px 20px;
+        }
+
+        /* Beautiful Typing dot animation */
+        .dot-typing {
+            display: inline-flex;
+            gap: 5px;
+            background: rgba(255,255,255,0.5);
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+        .dot {
+            width: 7px; height: 7px; background-color: #16A8B8; border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="header">
+            MediGuide
+        </div>
+        <div class="chat-container">
+            <div class="chat-box" id="chat-box">
+                <div class="message bot-message">Hello! I understand you are seeking some health guidance. Please describe any symptoms you are experiencing.<br><br><small style="opacity:0.8; font-weight:400;">Note: I am an AI, not a doctor. This is not a formal medical diagnosis.</small></div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="dot-typing">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <div class="input-pill">
+                    <input type="text" id="user-input" placeholder="Type your symptoms here..." onkeypress="handleKeyPress(event)" autocomplete="off">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <!-- Modern Up Arrow Icon -->
+                        <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const loading = document.getElementById('loading');
+
+        // Simple formatting to handle Markdown bolding/bullets from Gemini
+        function formatMessage(text) {
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return formatted;
+        }
+
+        function appendMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.innerHTML = formatMessage(text);
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+            
+            appendMessage('user', text);
+            userInput.value = '';
+            
+            loading.style.display = 'block';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('/health', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symptoms: text })
+                });
+                
+                const data = await response.json();
+                loading.style.display = 'none';
+                
+                if (data.response) {
+                    appendMessage('bot', data.response);
+                } else {
+                    appendMessage('bot', "Error: Could not get a response.");
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                appendMessage('bot', "Error: Could not connect to the server.");
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>

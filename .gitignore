@@ -1,0 +1,6 @@
+.env
+key.json
+venv/
+__pycache__/
+*.pyc
+Dockerfile.txt
