@@ -40,7 +40,7 @@ ACTIVE_SESSIONS = {}
 def get_or_create_chat(session_id):
     if session_id not in ACTIVE_SESSIONS:
         ACTIVE_SESSIONS[session_id] = client.chats.create(
-            model="gemini-1.5-pro",
+            model="gemini-flash-latest",
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
             )
