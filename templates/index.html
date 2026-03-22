@@ -5,51 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediGuide - AI Assistant</title>
     <!-- Importing modern font for a pristine look -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
         body { 
             font-family: 'Outfit', sans-serif; 
             margin: 0; 
-            height: 100vh; 
+            min-height: 100vh; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            background: linear-gradient(135deg, #30D2E6, #149FBE);
-            background-size: cover;
+            background: #0f172a; /* Deep tech dark background */
+            color: #f8fafc;
             padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
-        
-        .app-wrapper {
+
+        /* Ambient glowing background blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: drift 12s infinite alternate ease-in-out;
+            opacity: 0.6;
+        }
+        .blob.cyan { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(6, 182, 212, 0.3); animation-delay: 0s; }
+        .blob.purple { bottom: -10%; right: -10%; width: 45vw; height: 45vw; background: rgba(139, 92, 246, 0.3); animation-delay: -5s; }
+        .blob.blue { top: 40%; left: 30%; width: 30vw; height: 30vw; background: rgba(59, 130, 246, 0.2); animation-delay: -2s; }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(80px, 40px) scale(1.1); }
+        }
+
+        .page-wrapper {
+            display: flex;
             width: 100%;
-            max-width: 700px;
+            max-width: 1200px;
+            height: 90vh;
+            max-height: 850px;
+            gap: 30px;
+            z-index: 1;
+        }
+
+        /* SIDEBAR STYLING */
+        .sidebar {
+            flex: 1;
+            max-width: 380px;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 40px 30px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            height: 100%;
-            max-height: 850px;
+            gap: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .header {
-            color: #ffffff;
-            font-size: 38px;
+        .brand-title {
+            font-size: 42px;
             font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #22d3ee, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: -1px;
+        }
+
+        .brand-subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+            margin-top: -15px;
+            font-weight: 300;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 22px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: default;
+        }
+        
+        .info-card:hover { 
+            transform: translateY(-5px); 
+            background: rgba(255, 255, 255, 0.06); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .info-card h3 { 
+            margin: 0 0 12px 0; 
+            font-size: 18px; 
+            color: #e2e8f0; 
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 10px 0 10px;
-            text-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 8px;
         }
 
+        .info-card p, .info-card li { 
+            color: #cbd5e1; 
+            font-size: 14.5px; 
+            line-height: 1.6; 
+            font-weight: 300;
+        }
+
+        .info-card ul { 
+            margin: 0; 
+            padding-left: 20px; 
+        }
+
+        .info-card.emergency { 
+            border-left: 4px solid #ef4444; 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+        }
+        .info-card.emergency h3 { color: #fca5a5; }
+
+        /* CHAT CONTAINER STYLING */
         .chat-container { 
-            flex: 1;
-            /* Ultra-modern glassmorphism medical look */
-            background: rgba(220, 248, 250, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 35px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15), inset 0 0 0 1.5px rgba(255,255,255, 0.6); 
+            flex: 2.2;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
@@ -58,28 +142,31 @@
 
         .chat-box { 
             flex: 1; 
-            padding: 30px; 
+            padding: 35px 40px; 
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 20px; 
+            gap: 24px; 
         }
 
-        /* Beautiful scrollbar hiding */
         .chat-box::-webkit-scrollbar { width: 6px; }
-        .chat-box::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 10px; }
+        .chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .chat-box::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
         .message { 
-            max-width: 80%; 
-            padding: 16px 20px; 
+            max-width: 82%; 
+            padding: 18px 24px; 
             border-radius: 20px; 
-            line-height: 1.5; 
-            font-size: 16.5px; 
+            line-height: 1.6; 
+            font-size: 16px; 
             position: relative;
-            animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             white-space: pre-wrap;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 300;
         }
+
+        strong { font-weight: 600; color: #fff; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(15px); }
@@ -88,38 +175,40 @@
 
         .bot-message { 
             align-self: flex-start; 
-            background: #82DFEA; 
-            color: #0A5A66; 
+            background: rgba(34, 211, 238, 0.1); 
+            color: #cffafe; 
+            border: 1px solid rgba(34, 211, 238, 0.2);
             border-bottom-left-radius: 6px; 
         }
 
         .user-message { 
             align-self: flex-end; 
-            background: #ffffff; 
-            color: #108796; 
+            background: rgba(139, 92, 246, 0.15); 
+            color: #ede9fe; 
+            border: 1px solid rgba(139, 92, 246, 0.25);
             border-bottom-right-radius: 6px; 
         }
 
         .input-wrapper {
-            padding: 0 30px 30px 30px;
+            padding: 0 40px 35px 40px;
             background: transparent;
         }
 
         .input-pill {
             display: flex; 
             align-items: center;
-            background: #7FD5E0; 
+            background: rgba(15, 23, 42, 0.6); 
             border-radius: 40px;
-            padding: 5px 5px 5px 22px;
-            box-shadow: 0 8px 25px rgba(13, 116, 126, 0.12);
-            transition: background 0.3s, box-shadow 0.3s;
-            border: 2px solid transparent;
+            padding: 8px 8px 8px 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
         
         .input-pill:focus-within {
-            background: #8EE0EA;
-            border-color: rgba(255,255,255,0.4);
-            box-shadow: 0 10px 30px rgba(13, 116, 126, 0.18);
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(34, 211, 238, 0.4);
+            box-shadow: 0 10px 35px rgba(34, 211, 238, 0.1);
         }
 
         input[type="text"] { 
@@ -127,20 +216,19 @@
             background: transparent;
             border: none; 
             outline: none; 
-            font-size: 17px; 
-            color: #0c626f;
+            font-size: 16px; 
+            color: #f8fafc;
             font-family: 'Outfit', sans-serif;
-            font-weight: 500;
+            font-weight: 300;
         }
 
         input[type="text"]::placeholder {
-            color: rgba(12, 98, 111, 0.5);
-            font-weight: 400;
+            color: #64748b;
         }
 
         .send-btn { 
-            background: #ffffff; 
-            color: #16A8B8; 
+            background: linear-gradient(135deg, #22d3ee, #0ea5e9); 
+            color: #fff; 
             border: none; 
             width: 46px;
             height: 46px;
@@ -149,60 +237,94 @@
             align-items: center;
             border-radius: 50%; 
             cursor: pointer; 
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
             flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
 
         .send-btn:hover { 
-            transform: translateY(-2px); 
-            background: #f4fdff;
-            color: #0c8a98;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: scale(1.05); 
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5);
         }
 
         .send-btn svg {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             fill: currentColor;
-            margin-bottom: 2px;
+            margin-right: -2px;
         }
 
         .loading { 
             display: none;
-            padding: 0 20px 15px 20px;
+            padding: 0 40px 20px 40px;
         }
 
-        /* Beautiful Typing dot animation */
         .dot-typing {
             display: inline-flex;
-            gap: 5px;
-            background: rgba(255,255,255,0.5);
-            padding: 10px 15px;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 18px;
             border-radius: 20px;
         }
         .dot {
-            width: 7px; height: 7px; background-color: #16A8B8; border-radius: 50%;
+            width: 8px; height: 8px; background-color: #22d3ee; border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
         .dot:nth-child(1) { animation-delay: -0.32s; }
         .dot:nth-child(2) { animation-delay: -0.16s; }
         
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
-            40% { transform: scale(1); opacity: 1; }
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
         }
-        
+
+        @media (max-width: 900px) {
+            .page-wrapper { flex-direction: column; height: auto; max-height: none; }
+            .sidebar { max-width: 100%; border-radius: 20px; }
+            .chat-container { height: 600px; border-radius: 20px; }
+            body { padding: 15px; }
+        }
     </style>
 </head>
 <body>
-    <div class="app-wrapper">
-        <div class="header">
-            MediGuide
+    <div class="blob cyan"></div>
+    <div class="blob purple"></div>
+    <div class="blob blue"></div>
+
+    <div class="page-wrapper">
+        <div class="sidebar">
+            <div>
+                <h1 class="brand-title">MediGuide</h1>
+                <p class="brand-subtitle">Your AI Health Companion</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>💡 Health Tips</h3>
+                <ul>
+                    <li>Drink at least 8 glasses of water daily.</li>
+                    <li>Aim for 7-9 hours of quality sleep.</li>
+                    <li>Incorporate 30 minutes of physical activity.</li>
+                    <li>Eat a balanced diet rich in vegetables.</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🩺 How to use</h3>
+                <p>Describe your symptoms clearly. Include information about when they started, how severe they are, and any other relevant details. The AI will guide you with general medical context.</p>
+            </div>
+
+            <div style="flex-grow: 1;"></div>
+
+            <div class="info-card emergency">
+                <h3>🚨 Emergency Warning</h3>
+                <p>If you are experiencing severe chest pain, extreme difficulty breathing, fainting, or sudden severe weakness, please call your local emergency hotline immediately. Do not rely on AI for emergencies.</p>
+            </div>
         </div>
+
         <div class="chat-container">
             <div class="chat-box" id="chat-box">
-                <div class="message bot-message">Hello! I understand you are seeking some health guidance. Please describe any symptoms you are experiencing.<br><br><small style="opacity:0.8; font-weight:400;">Note: I am an AI, not a doctor. This is not a formal medical diagnosis.</small></div>
+                <div class="message bot-message">Hello! I am MediGuide. I understand you are seeking health guidance today. Please describe any symptoms you are experiencing so I can assist you.<br><br><small style="opacity:0.6; font-weight:300;">Disclaimer: I provide general health information, not medical diagnoses. Please consult a human doctor for formal advice.</small></div>
             </div>
             
             <div class="loading" id="loading">
@@ -215,8 +337,8 @@
                 <div class="input-pill">
                     <input type="text" id="user-input" placeholder="Type your symptoms here..." onkeypress="handleKeyPress(event)" autocomplete="off">
                     <button class="send-btn" onclick="sendMessage()">
-                        <!-- Modern Up Arrow Icon -->
-                        <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                        <!-- Modern Send Icon -->
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </div>
             </div>
@@ -228,10 +350,8 @@
         const userInput = document.getElementById('user-input');
         const loading = document.getElementById('loading');
 
-        // Simple formatting to handle Markdown bolding/bullets from Gemini
         function formatMessage(text) {
-            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            return formatted;
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
 
         function appendMessage(sender, text) {
