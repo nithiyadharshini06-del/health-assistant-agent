@@ -1,4 +1,7 @@
 import os
+import io
+import base64
+from PIL import Image
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -8,12 +11,8 @@ load_dotenv()
 
 PROJECT_ID = os.getenv("PROJECT_ID", "health-assistant-agent")
 LOCATION = os.getenv("LOCATION", "us-central1")
-
-# Fetch the generic API key from the .env file
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Create the standard client (no vertexai=True) to completely bypass the 
-# Google Cloud Vertex strict billing requirements!
 client = genai.Client(api_key=API_KEY)
 
 system_instruction = """You are a Symptom Checker AI assistant. Your job is to understand the user's symptoms and provide basic health guidance safely.
@@ -33,17 +32,49 @@ system_instruction = """You are a Symptom Checker AI assistant. Your job is to u
 
 ### Response Style:
 - Be clear, short, and supportive
-- Use bullet points
+- Use bullet points and markdown formatting (bold, headers)
 - Ask follow-up questions when needed"""
 
-chat = client.chats.create(
-    model="gemini-2.5-flash",
-    config=types.GenerateContentConfig(
-        system_instruction=system_instruction,
-    )
-)
+ACTIVE_SESSIONS = {}
 
-def health_advice(user_input):
-    # Sends a message to the active chat session to maintain conversation history
-    response = chat.send_message(user_input)
+def get_or_create_chat(session_id):
+    if session_id not in ACTIVE_SESSIONS:
+        ACTIVE_SESSIONS[session_id] = client.chats.create(
+            model="gemini-2.5-flash",
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+            )
+        )
+    return ACTIVE_SESSIONS[session_id]
+
+def clear_chat(session_id):
+    if session_id in ACTIVE_SESSIONS:
+        del ACTIVE_SESSIONS[session_id]
+
+def health_advice(session_id, user_input, image_base64=None):
+    chat = get_or_create_chat(session_id)
+    contents = []
+    
+    if user_input and user_input.strip():
+        contents.append(user_input)
+        
+    if image_base64:
+        try:
+            if "," in image_base64:
+                image_base64 = image_base64.split(",")[1]
+            image_data = base64.b64decode(image_base64)
+            img = Image.open(io.BytesIO(image_data))
+            contents.append(img)
+            
+            # If no manual text was provided, provide a default prompt for the image
+            if not user_input or not user_input.strip():
+                contents.append("Please analyze this medical-related image regarding my symptoms.")
+        except Exception as e:
+            print(f"Error decoding image: {e}")
+            contents.append("[System: Failed to process attached image]")
+
+    if not contents:
+        return "I didn't receive any input. How can I help you?"
+
+    response = chat.send_message(contents)
     return response.text
