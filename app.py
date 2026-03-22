@@ -23,9 +23,15 @@ def health():
         result = health_advice(session_id, symptoms, image_base64)
         return jsonify({"response": result})
     except Exception as e:
+        error_msg = str(e)
         import traceback
         traceback.print_exc()
-        return jsonify({"response": f"Server Error: {str(e)}"})
+        
+        # Check if the error is a 429 Quota Exhausted error from Google
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            return jsonify({"response": "**⚠️ Slow Down!**<br><br>The AI is currently receiving too many requests (Free Tier Limit). Please wait about 60 seconds and try again!"})
+            
+        return jsonify({"response": f"Server Error: {error_msg}"})
 
 @app.route("/clear", methods=["POST"])
 def clear():
